@@ -12,6 +12,7 @@ import AppKit
 import UIKit
 #endif
 
+// OS agnostic color definitions.
 #if os(macOS)
 public typealias PlatformColor = NSColor
 public typealias PlatformImage = NSImage
