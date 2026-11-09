@@ -44,6 +44,11 @@ extension ContentView
                 print("🔴 About to load data into ColorList")
                 try ColorList.shared.loadFromImportedData(importedData)
                 logImportSuccess(importedData)
+                // Remember the file (only now that it has loaded) so it can be reloaded at the next launch.
+                if let Source = importedData.sourceURL
+                {
+                    Settings.RememberLastFile(from: Source, name: importedData.sourceFileName)
+                }
             }
             catch
             {

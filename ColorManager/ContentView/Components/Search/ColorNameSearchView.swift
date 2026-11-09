@@ -47,7 +47,7 @@ struct ColorNameSearchView: View
                     .padding(.horizontal)
                     HStack
                     {
-                        Text("Enter the name of the color. Use wildcards for regex search.")
+                        Text("Enter part of a color name. Use * for any run of characters and ? for any one character.")
                             .font(.footnote)
                         Spacer()
                     }
@@ -73,6 +73,32 @@ struct ColorNameSearchView: View
                 Spacer()
             }
         }
+        // Publish the search whenever the input changes, and when this view appears.
+        .onChange(of: SearchFor, initial: true)
+        {
+            PublishSearch()
+        }
+        .onChange(of: CharSet)
+        {
+            PublishSearch()
+        }
+    }
+    
+    /// Describe the current input as a name search for the caller.
+    private func PublishSearch()
+    {
+        let Record = SearchRecord()
+        Record.SearchType = .Name
+        let Model = NameSearchModel()
+        Model.NameSearch = SearchFor
+        switch CharSet
+        {
+            case 1: Model.CharSet = .OnlyUTF8
+            case 2: Model.CharSet = .NonUTF8
+            default: Model.CharSet = .All
+        }
+        Record.NameSearch = Model
+        Searcher = Record
     }
 }
 

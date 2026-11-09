@@ -15,6 +15,10 @@ struct ColorListRowView: View
     let SwatchColor: Color
     let HexValue: String
     let IsSelected: Bool
+    /// True if the color is marked for the palette.
+    var IsMarked: Bool = false
+    /// True while palette selection mode is on; shows a checkbox for every row.
+    var ShowCheckbox: Bool = false
     let OnTap: () -> Void
 
     var body: some View
@@ -23,6 +27,12 @@ struct ColorListRowView: View
         {
             HStack(spacing: 10)
             {
+                if ShowCheckbox || IsMarked
+                {
+                    Image(systemName: IsMarked ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(IsMarked ? Color.accentColor : Color.secondary)
+                        .accessibilityLabel(IsMarked ? "Selected for palette" : "Not selected for palette")
+                }
                 RoundedRectangle(cornerRadius: 4)
                     .fill(SwatchColor)
                     .frame(width: 36, height: 36)

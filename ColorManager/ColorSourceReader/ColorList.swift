@@ -29,6 +29,9 @@ import Combine
     /// All color groups from imported file
     @Published var colorGroups: [ColorGroup]? = nil
     
+    /// Set to ask the main window to open a color's group and highlight it. The main window clears it once handled.
+    @Published var RevealRequest: ColorRevealRequest? = nil
+    
     /// Publisher that emits when color data changes
     let didChangePublisher = PassthroughSubject<Void, Never>()
     

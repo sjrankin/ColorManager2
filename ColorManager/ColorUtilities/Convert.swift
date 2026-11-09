@@ -42,44 +42,71 @@ class Convert
         #endif
     }
     
+    /// Convert a hex string to a `PlatformColor`. See ``FromHexToChannels(_:)`` for accepted formats.
+    /// - Returns: The color, or black if the string is not a valid hex color.
     static func FromHex(_ Hex: String) -> PlatformColor
     {
-        if Hex.isEmpty
-        {
-            return PlatformColor.black
-        }
-        if Hex.count != 8
-        {
-            return PlatformColor.black
-        }
-        let HexNoPrefix = String(Hex.dropFirst(2))
-        guard let R = Int(HexNoPrefix.prefix(2), radix: 16),
-              let G = Int(HexNoPrefix.dropFirst(2).prefix(2), radix: 16),
-              let B = Int(HexNoPrefix.dropFirst(4).prefix(2), radix: 16) else
-        {
-            return PlatformColor.black
-        }
-        return FromRGB(R, G, B)
+        let Channels = FromHexToChannels(Hex)
+        return FromRGB(Channels.red, Channels.green, Channels.blue)
     }
-    
+
+    /// Parse a hex string into integer channels.
+    ///
+    /// Accepted formats (case-insensitive, surrounding whitespace ignored): `RRGGBB`, `0xRRGGBB`, `#RRGGBB`, and the
+    /// same with a trailing alpha byte (`RRGGBBAA`), which is ignored.
+    /// - Returns: The channels, or black if the string is not a valid hex color.
     static func FromHexToChannels(_ Hex: String) -> (red: Int, green: Int, blue: Int)
     {
-        if Hex.isEmpty
+        return ParseHexChannels(Hex) ?? (0, 0, 0)
+    }
+    
+    /// Parse a hex string into integer channels. Accepts the same formats as ``FromHexToChannels(_:)``.
+    /// - Returns: The channels, or `nil` if the string is not a valid hex color.
+    static func ParseHexChannels(_ Hex: String) -> (red: Int, green: Int, blue: Int)?
+    {
+        guard let Parsed = ParseHex(Hex) else
         {
-            return (0, 0, 0)
+            return nil
         }
-        if Hex.count != 8
+        return (Parsed.red, Parsed.green, Parsed.blue)
+    }
+    
+    /// Parse a hex string into integer channels and alpha. This is the one hex parser for the whole app; everything that
+    /// reads hex strings (including `Color(hexString:)`) goes through it.
+    ///
+    /// Accepted formats (case-insensitive, surrounding whitespace ignored): `RRGGBB`, `0xRRGGBB`, `#RRGGBB`, and the
+    /// same with a trailing alpha byte (`RRGGBBAA`). Alpha is `255` when the string has none.
+    /// - Returns: The channels and alpha (each `0` - `255`), or `nil` if the string is not a valid hex color.
+    static func ParseHex(_ Hex: String) -> (red: Int, green: Int, blue: Int, alpha: Int)?
+    {
+        var Digits = Hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        if Digits.hasPrefix("#")
         {
-            return (0, 0, 0)
+            Digits.removeFirst()
         }
-        let HexNoPrefix = String(Hex.dropFirst(2))
-        guard let R = Int(HexNoPrefix.prefix(2), radix: 16),
-              let G = Int(HexNoPrefix.dropFirst(2).prefix(2), radix: 16),
-              let B = Int(HexNoPrefix.dropFirst(4).prefix(2), radix: 16) else
+        else if Digits.lowercased().hasPrefix("0x")
         {
-            return (0, 0, 0)
+            Digits.removeFirst(2)
         }
-        return (R, G, B)
+        // `Int(_:radix:)` accepts a leading `+` or `-`, so check for real hex digits first.
+        guard Digits.count == 6 || Digits.count == 8,
+              Digits.allSatisfy({ $0.isASCII && $0.isHexDigit }),
+              let R = Int(Digits.prefix(2), radix: 16),
+              let G = Int(Digits.dropFirst(2).prefix(2), radix: 16),
+              let B = Int(Digits.dropFirst(4).prefix(2), radix: 16) else
+        {
+            return nil
+        }
+        var Alpha = 255
+        if Digits.count == 8
+        {
+            guard let Parsed = Int(Digits.dropFirst(6).prefix(2), radix: 16) else
+            {
+                return nil
+            }
+            Alpha = Parsed
+        }
+        return (R, G, B, Alpha)
     }
     
     // MARK: - PlatformColor to Channels
@@ -97,7 +124,7 @@ class Convert
         var blue: CGFloat = 0.0
         var alpha: CGFloat = 0.0
         cscolor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        return (red: Int(red * 255), green: Int(green * 255), blue: Int(blue * 255))
+        return (red: ColorSpaceMath.ToByte(red), green: ColorSpaceMath.ToByte(green), blue: ColorSpaceMath.ToByte(blue))
         #else
         var red: CGFloat = 0.0
         var green: CGFloat = 0.0
@@ -105,7 +132,7 @@ class Convert
         var alpha: CGFloat = 0.0
         if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         {
-            return  (red: Int(red * 255), green: Int(green * 255), blue: Int(blue * 255))
+            return (red: ColorSpaceMath.ToByte(red), green: ColorSpaceMath.ToByte(green), blue: ColorSpaceMath.ToByte(blue))
         }
         print("\(#function): Error converting UIColor to RGB.")
         return (red: 0, green: 0, blue: 0)
@@ -144,7 +171,7 @@ class Convert
     /// - Parameter From: The `PlatformColor` whose hex value will be returned.
     /// - Parameter AddPrefix: If `true`, "`0x`" will prefix the string. If `false`, there will be no added prefix.
     /// - Returns: The hex values of the channels of the passed `PlatformColor`.
-    /// - Note: Hex channel values use lower-case alphanumerics.
+    /// - Note: Hex channel values use upper-case alphanumerics.
     static func HexChannels(From color: PlatformColor, AddPrefix: Bool = true) -> String
     {
         let Channels = Convert.IntChannels(From: color)
@@ -152,6 +179,81 @@ class Convert
         let GreenHex = Channels.green.hex
         let BlueHex = Channels.blue.hex
         return "\(AddPrefix ? "0x" : "")\(RedHex)\(GreenHex)\(BlueHex)"
+    }
+
+    // MARK: - PlatformColor to other color spaces
+
+    /// Hue (degrees, `0` - `360`), saturation (`0` - `100`), and brightness (`0` - `100`) of a color.
+    static func HSBChannels(From color: PlatformColor) -> (h: Double, s: Double, b: Double)
+    {
+        let RGB = DoubleChannels(From: color)
+        return ColorSpaceMath.RGBToHSB(R: RGB.red, G: RGB.green, B: RGB.blue)
+    }
+
+    /// Hue (degrees, `0` - `360`), saturation (`0` - `100`), and lightness (`0` - `100`) of a color.
+    static func HSLChannels(From color: PlatformColor) -> (h: Double, s: Double, l: Double)
+    {
+        let RGB = DoubleChannels(From: color)
+        return ColorSpaceMath.RGBToHSL(R: RGB.red, G: RGB.green, B: RGB.blue)
+    }
+
+    /// Cyan, magenta, yellow, and key (black) of a color, each `0` - `100`. This is the simple, profile-less conversion.
+    static func CMYKChannels(From color: PlatformColor) -> (c: Double, m: Double, y: Double, k: Double)
+    {
+        let RGB = DoubleChannels(From: color)
+        return ColorSpaceMath.RGBToCMYK(R: RGB.red, G: RGB.green, B: RGB.blue)
+    }
+
+    /// CIE XYZ (D65, `Y` of white is `1.0`) of a color.
+    static func XYZChannels(From color: PlatformColor) -> (x: Double, y: Double, z: Double)
+    {
+        let RGB = DoubleChannels(From: color)
+        return ColorSpaceMath.RGBToXYZ(R: RGB.red, G: RGB.green, B: RGB.blue)
+    }
+
+    /// CIE L*a*b* (D65) of a color.
+    static func LabChannels(From color: PlatformColor) -> (l: Double, a: Double, b: Double)
+    {
+        let RGB = DoubleChannels(From: color)
+        return ColorSpaceMath.RGBToLab(R: RGB.red, G: RGB.green, B: RGB.blue)
+    }
+
+    // MARK: - Other color spaces to PlatformColor
+
+    /// Create a color from hue (degrees), saturation (`0` - `100`), and brightness (`0` - `100`).
+    static func FromHSB(H: Double, S: Double, B: Double) -> PlatformColor
+    {
+        let RGB = ColorSpaceMath.HSBToRGB(H: H, S: S.Clamped(0, 100), B: B.Clamped(0, 100))
+        return FromRGB(R: RGB.r, G: RGB.g, B: RGB.b)
+    }
+
+    /// Create a color from hue (degrees), saturation (`0` - `100`), and lightness (`0` - `100`).
+    static func FromHSL(H: Double, S: Double, L: Double) -> PlatformColor
+    {
+        let RGB = ColorSpaceMath.HSLToRGB(H: H, S: S.Clamped(0, 100), L: L.Clamped(0, 100))
+        return FromRGB(R: RGB.r, G: RGB.g, B: RGB.b)
+    }
+
+    /// Create a color from cyan, magenta, yellow, and key (black), each `0` - `100`.
+    static func FromCMYK(C: Double, M: Double, Y: Double, K: Double) -> PlatformColor
+    {
+        let RGB = ColorSpaceMath.CMYKToRGB(C: C.Clamped(0, 100), M: M.Clamped(0, 100),
+                                           Y: Y.Clamped(0, 100), K: K.Clamped(0, 100))
+        return FromRGB(R: RGB.r, G: RGB.g, B: RGB.b)
+    }
+
+    /// Create a color from CIE XYZ (D65, `Y` of white is `1.0`). Out-of-gamut colors are clamped.
+    static func FromXYZ(X: Double, Y: Double, Z: Double) -> PlatformColor
+    {
+        let RGB = ColorSpaceMath.XYZToRGB(X: X, Y: Y, Z: Z)
+        return FromRGB(R: RGB.r, G: RGB.g, B: RGB.b)
+    }
+
+    /// Create a color from CIE L*a*b* (D65). Out-of-gamut colors are clamped.
+    static func FromLab(L: Double, A: Double, B: Double) -> PlatformColor
+    {
+        let RGB = ColorSpaceMath.LabToRGB(L: L, A: A, B: B)
+        return FromRGB(R: RGB.r, G: RGB.g, B: RGB.b)
     }
 }
 

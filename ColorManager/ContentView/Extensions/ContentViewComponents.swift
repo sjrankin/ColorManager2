@@ -32,8 +32,11 @@ extension ContentView
             exportButton
                 .padding(.trailing, GroupSpacer)
             paletteButton
+            imageButton
+            paletteSelectionControls
             createColorButton
             infoButton
+            setupButton
             Spacer()
         }
         .padding(.horizontal, 12)
@@ -56,8 +59,11 @@ extension ContentView
                 exportButton
                 Divider().frame(height: 20)
                 paletteButton
+                imageButton
+                paletteSelectionControls
                 createColorButton
                 infoButton
+                setupButton
             }
             .padding(.horizontal, 12)
         }
@@ -97,8 +103,7 @@ extension ContentView
         }
         .onChange(of: selectedGroupPath)
         { _, _ in
-            SelectedSwatch = UUID.empty
-            SelectedColorRecord = nil
+            GroupPathChanged()
         }
 #else
         // iOS: full-width color display; navigator and info panel appear as sheets
@@ -126,8 +131,7 @@ extension ContentView
         }
         .onChange(of: selectedGroupPath)
         { _, _ in
-            SelectedSwatch = UUID.empty
-            SelectedColorRecord = nil
+            GroupPathChanged()
             ShowStructureNavigator = false
         }
 #endif
@@ -236,34 +240,52 @@ extension ContentView
     /// Right side color display area
     var ColorSwatchDisplay: some View
     {
-        ScrollView
+        ScrollViewReader
         {
-            VStack(spacing: 0)
+            Proxy in
+            ScrollView
             {
-                colorGrid
-                clearSelectionSpacer
+                VStack(spacing: 0)
+                {
+                    colorGrid
+                    clearSelectionSpacer
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .contentShape(Rectangle())
+                .onTapGesture { clearSelection() }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .contentShape(Rectangle())
-            .onTapGesture { clearSelection() }
+            .background(PaletteBackground)
+            .onChange(of: ScrollTarget)
+            {
+                _, Target in
+                ScrollToTarget(Target, using: Proxy)
+            }
         }
-        .background(PaletteBackground)
     }
     
     var ColorListDisplay: some View
     {
-        ScrollView
+        ScrollViewReader
         {
-            VStack(spacing: 0)
+            Proxy in
+            ScrollView
             {
-                colorListView
-                clearSelectionSpacer
+                VStack(spacing: 0)
+                {
+                    colorListView
+                    clearSelectionSpacer
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .contentShape(Rectangle())
+                .onTapGesture { clearSelection() }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .contentShape(Rectangle())
-            .onTapGesture { clearSelection() }
+            .background(PaletteBackground)
+            .onChange(of: ScrollTarget)
+            {
+                _, Target in
+                ScrollToTarget(Target, using: Proxy)
+            }
         }
-        .background(PaletteBackground)
     }
     
     @ViewBuilder var colorListView: some View
@@ -285,10 +307,16 @@ extension ContentView
                         SwatchColor: colorFromRecord(colorRecord),
                         HexValue: valueFromRecord(colorRecord),
                         IsSelected: colorRecord.id == SelectedSwatch,
+                        IsMarked: Palette.Contains(colorRecord),
+                        ShowCheckbox: SelectingForPalette,
                         OnTap:
                         {
                             SelectedSwatch = colorRecord.id
                             SelectedColorRecord = colorRecord
+                            if SelectingForPalette
+                            {
+                                Palette.Toggle(colorRecord)
+                            }
                         })
                 }
             }
@@ -319,7 +347,15 @@ extension ContentView
                                SwatchColorName: name,
                                SwatchColorValue: valueFromRecord(colorRecord),
                                SwatchWidth: SwatchSize,
-                               onTap: { SelectedColorRecord = colorRecord })
+                               IsMarked: Palette.Contains(colorRecord),
+                               onTap:
+                                {
+                                    SelectedColorRecord = colorRecord
+                                    if SelectingForPalette
+                                    {
+                                        Palette.Toggle(colorRecord)
+                                    }
+                                })
                 }
             }
         }

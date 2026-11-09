@@ -9,8 +9,9 @@ import SwiftUI
 
 struct SwatchColorView: View
 {
-    @State var TheColor: Color = Color.yellow
-    @State var SideLength: CGFloat = 64.0
+    // These are plain inputs, not `@State`, so the view updates when the caller passes new values.
+    var TheColor: Color = Color.yellow
+    var SideLength: CGFloat = 64.0
     
     var body: some View
     {

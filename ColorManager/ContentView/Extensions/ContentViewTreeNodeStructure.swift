@@ -301,6 +301,9 @@ struct CollectionTreeNode: View
 {
     ContentView()
         .environmentObject(ColorList.shared)
+        .environment(PaletteSelection())
+        .environment(AppSettings())
+        .environment(ImagePalettizerModel())
 }
 
 extension UUID

@@ -17,8 +17,50 @@ import UIKit
 struct ColorSearchView: View
 {
     @Environment(\.dismiss) var Dismiss
+    @EnvironmentObject var colorList: ColorList
     @State var SelectedOption: Int = 0
     @State var SearchMethod: SearchRecord? = nil
+    @State var SearchResults: [ColorSearchResult] = []
+    @State var ShowResults: Bool = false
+    /// The difference method behind the results' distances, if the last search measured distance.
+    @State var ResultsMethod: ColorDifferenceMethods? = nil
+    
+    /// The search can run only if the input of the selected option has produced a search of the matching type.
+    var CanSearch: Bool
+    {
+        guard let Method = SearchMethod else
+        {
+            return false
+        }
+        switch SelectedOption
+        {
+            case 0:
+                return Method.SearchType == .Name &&
+                !(Method.NameSearch?.NameSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            case 1:
+                return Method.SearchType == .Value && Method.ValueSearch != nil
+            default:
+                return false
+        }
+    }
+    
+    /// Ask the main window to open the result's group and highlight the color.
+    func Reveal(_ Result: ColorSearchResult)
+    {
+        colorList.RevealRequest = ColorRevealRequest(Record: Result.Record, Path: Result.PathComponents)
+    }
+    
+    /// Run the current search against the loaded colors and show the results.
+    func RunSearch()
+    {
+        guard let Method = SearchMethod else
+        {
+            return
+        }
+        SearchResults = ColorSearchEngine.Run(Method, in: colorList.colorGroups ?? [])
+        ResultsMethod = Method.ValueSearch?.SearchType == .Specified ? Method.ValueSearch?.Method : nil
+        ShowResults = true
+    }
 
     var body: some View
     {
@@ -44,10 +86,17 @@ struct ColorSearchView: View
                 {
                     switch SelectedOption
                     {
-                        case 0: ColorNameSearchView(Searcher: $SearchMethod)
-                        case 1: ColorValueSearchView(Searcher: $SearchMethod)
-                        case 2: ColorCameraSearchView(Searcher: $SearchMethod)
-                        default: NoOptionView()
+                        case 0:
+                            ColorNameSearchView(Searcher: $SearchMethod)
+                            
+                        case 1:
+                            ColorValueSearchView(Searcher: $SearchMethod)
+                            
+                        case 2:
+                            ColorCameraSearchView(Searcher: $SearchMethod)
+                        
+                        default:
+                            NoOptionView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,15 +106,26 @@ struct ColorSearchView: View
             HStack
             {
                 Spacer()
-                Button("Search") {}
+                Button("Search")
+                {
+                    RunSearch()
+                }
+                .disabled(!CanSearch)
                 Spacer()
-                Button("Cancel") { self.Dismiss() }
+                Button("Cancel")
+                {
+                    self.Dismiss()
+                }
                 Spacer()
             }
             .padding()
         }
         .frame(minWidth: 500, minHeight: 400)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(isPresented: $ShowResults)
+        {
+            SearchResultsView(Results: SearchResults, Method: ResultsMethod, OnReveal: Reveal)
+        }
 #else
         VStack(spacing: 0)
         {
@@ -95,10 +155,17 @@ struct ColorSearchView: View
             {
                 switch SelectedOption
                 {
-                    case 0: ColorNameSearchView(Searcher: $SearchMethod)
-                    case 1: ColorValueSearchView(Searcher: $SearchMethod)
-                    case 2: ColorCameraSearchView(Searcher: $SearchMethod)
-                    default: NoOptionView()
+                    case 0:
+                        ColorNameSearchView(Searcher: $SearchMethod)
+                    
+                    case 1:
+                        ColorValueSearchView(Searcher: $SearchMethod)
+                    
+                    case 2:
+                        ColorCameraSearchView(Searcher: $SearchMethod)
+                    
+                    default:
+                        NoOptionView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -108,12 +175,23 @@ struct ColorSearchView: View
             HStack
             {
                 Spacer()
-                Button("Search") {}
+                Button("Search")
+                {
+                    RunSearch()
+                }
+                .disabled(!CanSearch)
                 Spacer()
-                Button("Cancel") { self.Dismiss() }
+                Button("Cancel")
+                {
+                    self.Dismiss()
+                }
                 Spacer()
             }
             .padding(.vertical, 12)
+        }
+        .sheet(isPresented: $ShowResults)
+        {
+            SearchResultsView(Results: SearchResults, Method: ResultsMethod, OnReveal: Reveal)
         }
 #endif
     }

@@ -32,6 +32,50 @@ extension ContentView
         ShowColorSearchView.toggle()
     }
     
+    /// Open the image palettizer. On macOS it is a separate window, so colors can be selected in the main window while it
+    /// is open; on iOS it is a sheet that lets the main window stay usable behind it.
+    func handleImage()
+    {
+#if os(macOS)
+        openWindow(id: "image-palettizer")
+#else
+        ShowImagePalettizer = true
+#endif
+    }
+    
+    /// Called once the palette file has been written. Rewrites it so the color group is named after the file the user chose.
+    func FinishSavingPalette(to URL: URL)
+    {
+        let Text = PaletteXMLWriter.XML(for: Palette.Records, name: PaletteXMLWriter.GroupName(forFile: URL))
+        do
+        {
+            try Data(Text.utf8).write(to: URL)
+        }
+        catch
+        {
+            PaletteMessage = error.localizedDescription
+        }
+    }
+    
+    /// Add the marked colors to an existing palette file and report what happened.
+    func MergePalette(into URL: URL)
+    {
+        do
+        {
+            let Result = try PaletteXMLWriter.Merge(Palette.Records, intoFileAt: URL)
+            var Message = "Added \(Result.Added) of \(Palette.Count) colors to \(URL.lastPathComponent)."
+            if Result.Skipped > 0
+            {
+                Message += " \(Result.Skipped) already in the file."
+            }
+            PaletteMessage = Message
+        }
+        catch
+        {
+            PaletteMessage = error.localizedDescription
+        }
+    }
+    
     func handleFilter()
     {
         // TODO: Implement filter functionality

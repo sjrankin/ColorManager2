@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		17D100082F9B000100A9638C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17B28EE72F6DB44B00A9638C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17B28EEE2F6DB44B00A9638C;
+			remoteInfo = ColorManager;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		17B28EEF2F6DB44B00A9638C /* ColorManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ColorManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		17D100022F9B000100A9638C /* ColorManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ColorManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -23,29 +34,31 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		17A15E0B2F7DA24300A9BA1C /* Exceptions for "ColorManager" folder in "Compile Sources" phase from "ColorManager" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 17B28EEB2F6DB44B00A9638C /* Sources */;
-			membershipExceptions = (
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		17B28EF12F6DB44B00A9638C /* ColorManager */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				17A15E0A2F7DA24300A9BA1C /* Exceptions for "ColorManager" folder in "ColorManager" target */,
-				17A15E0B2F7DA24300A9BA1C /* Exceptions for "ColorManager" folder in "Compile Sources" phase from "ColorManager" target */,
 			);
 			path = ColorManager;
+			sourceTree = "<group>";
+		};
+		17D100032F9B000100A9638C /* ColorManagerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ColorManagerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		17B28EEC2F6DB44B00A9638C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17D100052F9B000100A9638C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -59,6 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				17B28EF12F6DB44B00A9638C /* ColorManager */,
+				17D100032F9B000100A9638C /* ColorManagerTests */,
 				17B28EF02F6DB44B00A9638C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				17B28EEF2F6DB44B00A9638C /* ColorManager.app */,
+				17D100022F9B000100A9638C /* ColorManagerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,6 +111,29 @@
 			productReference = 17B28EEF2F6DB44B00A9638C /* ColorManager.app */;
 			productType = "com.apple.product-type.application";
 		};
+		17D100012F9B000100A9638C /* ColorManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17D100092F9B000100A9638C /* Build configuration list for PBXNativeTarget "ColorManagerTests" */;
+			buildPhases = (
+				17D100042F9B000100A9638C /* Sources */,
+				17D100052F9B000100A9638C /* Frameworks */,
+				17D100062F9B000100A9638C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17D100072F9B000100A9638C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				17D100032F9B000100A9638C /* ColorManagerTests */,
+			);
+			name = ColorManagerTests;
+			packageProductDependencies = (
+			);
+			productName = ColorManagerTests;
+			productReference = 17D100022F9B000100A9638C /* ColorManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -109,6 +147,10 @@
 					17B28EEE2F6DB44B00A9638C = {
 						CreatedOnToolsVersion = 26.3;
 						LastSwiftMigration = 2640;
+					};
+					17D100012F9B000100A9638C = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 17B28EEE2F6DB44B00A9638C;
 					};
 				};
 			};
@@ -127,12 +169,20 @@
 			projectRoot = "";
 			targets = (
 				17B28EEE2F6DB44B00A9638C /* ColorManager */,
+				17D100012F9B000100A9638C /* ColorManagerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		17B28EED2F6DB44B00A9638C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17D100062F9B000100A9638C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -149,7 +199,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		17D100042F9B000100A9638C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17D100072F9B000100A9638C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17B28EEE2F6DB44B00A9638C /* ColorManager */;
+			targetProxy = 17D100082F9B000100A9638C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		17B28EF82F6DB44D00A9638C /* Debug */ = {
@@ -389,6 +454,57 @@
 			};
 			name = Release;
 		};
+		17D1000A2F9B000100A9638C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4BB235M4GL;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Iroiro.ColorManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ColorManager.app/ColorManager";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/ColorManager.app/Contents/MacOS/ColorManager";
+			};
+			name = Debug;
+		};
+		17D1000B2F9B000100A9638C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4BB235M4GL;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Iroiro.ColorManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ColorManager.app/ColorManager";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/ColorManager.app/Contents/MacOS/ColorManager";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -406,6 +522,15 @@
 			buildConfigurations = (
 				17B28EFB2F6DB44D00A9638C /* Debug */,
 				17B28EFC2F6DB44D00A9638C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17D100092F9B000100A9638C /* Build configuration list for PBXNativeTarget "ColorManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17D1000A2F9B000100A9638C /* Debug */,
+				17D1000B2F9B000100A9638C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

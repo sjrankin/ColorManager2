@@ -29,7 +29,9 @@ struct ImportedColorData
     /// Type of import performed
     let importType: ImportType
     /// Source file name
-    let sourceFileName: String?
+    var sourceFileName: String?
+    /// The file the data was read from, if it came from a file.
+    var sourceURL: URL? = nil
 }
 
 /// Type of XML structure that was imported
@@ -175,7 +177,8 @@ class ColorListIO
                 colorGroups: nil,
                 colorRecords: nil,
                 importType: .fullStructure,
-                sourceFileName: url.lastPathComponent
+                sourceFileName: url.lastPathComponent,
+                sourceURL: url
             )
         }
         else if !delegate.parsedColorGroups.isEmpty
@@ -185,7 +188,8 @@ class ColorListIO
                 colorGroups: delegate.parsedColorGroups,
                 colorRecords: nil,
                 importType: .groups,
-                sourceFileName: url.lastPathComponent
+                sourceFileName: url.lastPathComponent,
+                sourceURL: url
             )
         }
         else if !delegate.parsedColorRecords.isEmpty
@@ -195,7 +199,8 @@ class ColorListIO
                 colorGroups: nil,
                 colorRecords: delegate.parsedColorRecords,
                 importType: .records,
-                sourceFileName: url.lastPathComponent
+                sourceFileName: url.lastPathComponent,
+                sourceURL: url
             )
         }
         else

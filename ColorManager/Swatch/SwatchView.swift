@@ -18,6 +18,8 @@ struct SwatchView: View
     var SwatchHeaderHeight: CGFloat = 48
     var ShowShadow: Bool = true
     var CanTap: Bool = true
+    /// True if the color is marked for the palette; draws a checkmark badge.
+    var IsMarked: Bool = false
     var onTap: (() -> Void)? = nil
     let CornerRadius: CGFloat = 2.0
     @State private var ShadowColor: Color = .black.opacity(0.4)
@@ -47,6 +49,19 @@ struct SwatchView: View
         .cornerRadius(CornerRadius)
         .overlay(RoundedRectangle(cornerRadius: CornerRadius)
             .stroke(BorderColor, lineWidth: BorderThickness))
+        .overlay(alignment: .topTrailing)
+        {
+            if IsMarked
+            {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, Color.accentColor)
+                    .background(.white, in: .circle)
+                    .padding(4)
+                    .accessibilityLabel("Selected for palette")
+            }
+        }
         .compositingGroup()
         .shadow(color: ShadowColor,
                 radius: ShadowRadius,
@@ -57,34 +72,44 @@ struct SwatchView: View
             SelectedID = ColorID
             onTap?()
         }
+        .onAppear
+        {
+            // A swatch created while already selected (for example after a group change) must look selected.
+            ApplySelection(SelectedID == ColorID)
+        }
         .onChange(of: SelectedID)
         {
-            old, new in
-            if new == ColorID
-            {
-                SwatchHeaderBackground = .white
-                BorderThickness = 2.0
-                #if os(macOS)
-                BorderColor = Color(nsColor: NSColor.controlAccentColor)
-                ShadowColor = SwatchColor
-                #else
-                BorderColor = Color(UIColor.tintColor)
-                ShadowColor = SwatchColor
-                #endif
-                ShadowRadius = 4.0
-                ShadowXOffset = 0.0
-                ShadowYOffset = 0.0
-            }
-            else
-            {
-                SwatchHeaderBackground = .gray.opacity(0.15)
-                BorderThickness = 1.0
-                BorderColor = .black
-                ShadowColor = .black.opacity(0.4)
-                ShadowRadius = 2.0
-                ShadowXOffset = 2.0
-                ShadowYOffset = 2.0
-            }
+            _, New in
+            ApplySelection(New == ColorID)
+        }
+    }
+    
+    /// Set the swatch's border, shadow, and header to match whether it is selected.
+    private func ApplySelection(_ IsSelected: Bool)
+    {
+        if IsSelected
+        {
+            SwatchHeaderBackground = .white
+            BorderThickness = 2.0
+            #if os(macOS)
+            BorderColor = Color(nsColor: NSColor.controlAccentColor)
+            #else
+            BorderColor = Color(UIColor.tintColor)
+            #endif
+            ShadowColor = SwatchColor
+            ShadowRadius = 4.0
+            ShadowXOffset = 0.0
+            ShadowYOffset = 0.0
+        }
+        else
+        {
+            SwatchHeaderBackground = .gray.opacity(0.15)
+            BorderThickness = 1.0
+            BorderColor = .black
+            ShadowColor = .black.opacity(0.4)
+            ShadowRadius = 2.0
+            ShadowXOffset = 2.0
+            ShadowYOffset = 2.0
         }
     }
 }
